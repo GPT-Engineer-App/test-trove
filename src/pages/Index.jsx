@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Menu, Paw, Heart, Info, ChevronDown } from "lucide-react";
-import { motion } from "framer-motion";
+import { Menu, Paw, Heart, Info, ChevronDown, Star, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,28 +11,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+
+const fetchCatFact = async () => {
+  const response = await fetch("https://catfact.ninja/fact");
+  const data = await response.json();
+  return data.fact;
+};
 
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
-  const [catFact, setCatFact] = useState("");
+
+  const { data: catFact, refetch: refetchCatFact } = useQuery({
+    queryKey: ["catFact"],
+    queryFn: fetchCatFact,
+    refetchOnWindowFocus: false,
+  });
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  useEffect(() => {
-    // Simulating an API call for a cat fact
-    const facts = [
-      "Cats have over 20 vocalizations, including the purr, meow, and chirp.",
-      "A group of cats is called a clowder.",
-      "Cats spend 70% of their lives sleeping.",
-      "The first cat in space was a French cat named Felicette in 1963.",
-      "Cats can rotate their ears 180 degrees.",
-    ];
-    setCatFact(facts[Math.floor(Math.random() * facts.length)]);
   }, []);
 
   return (
@@ -113,10 +114,87 @@ const Index = () => {
           transition={{ duration: 0.8 }}
           className="bg-white rounded-lg shadow-lg p-6 mb-12"
         >
-          <h2 className="text-2xl font-bold mb-4 text-center">Cat Fact of the Day</h2>
-          <p className="text-lg text-center italic">{catFact}</p>
+          <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center">
+            <Sparkles className="mr-2 text-yellow-400" />
+            Cat Fact of the Day
+            <Sparkles className="ml-2 text-yellow-400" />
+          </h2>
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={catFact}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="text-lg text-center italic"
+            >
+              {catFact}
+            </motion.p>
+          </AnimatePresence>
+          <div className="mt-4 text-center">
+            <Button onClick={() => refetchCatFact()} className="mt-2">
+              New Fact <Star className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
         </motion.div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        
+        <Tabs defaultValue="characteristics" className="mb-12">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="characteristics">Characteristics</TabsTrigger>
+            <TabsTrigger value="breeds">Popular Breeds</TabsTrigger>
+          </TabsList>
+          <TabsContent value="characteristics">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><Heart className="mr-2 text-red-500" /> Characteristics of Cats</CardTitle>
+                  <CardDescription>What makes cats unique?</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="list-disc pl-6 space-y-2">
+                    <li>Independent nature</li>
+                    <li>Excellent hunters with sharp claws and teeth</li>
+                    <li>Flexible bodies and quick reflexes</li>
+                    <li>Keen senses, especially hearing and night vision</li>
+                    <li>Communicate through vocalizations, body language, and scent</li>
+                  </ul>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+          <TabsContent value="breeds">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Card className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center"><Paw className="mr-2 text-purple-600" /> Popular Cat Breeds</CardTitle>
+                  <CardDescription>Some well-known cat breeds around the world</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
+                    {["Siamese", "Persian", "Maine Coon", "Bengal", "British Shorthair"].map((breed, index) => (
+                      <motion.div
+                        key={index}
+                        className="bg-gray-200 rounded-lg flex items-center justify-center p-4 h-32"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <p className="text-lg font-semibold text-center">{breed}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </TabsContent>
+        </Tabs>
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -162,33 +240,33 @@ const Index = () => {
           </motion.div>
         </div>
 
-        <Card className="mt-12 bg-white shadow-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center"><Info className="mr-2 text-blue-500" /> Interesting Cat Facts</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible>
-              <AccordionItem value="item-1">
-                <AccordionTrigger>How long do cats sleep?</AccordionTrigger>
-                <AccordionContent>
-                  Cats sleep an average of 15 hours a day, and some can sleep up to 20 hours in a 24-hour period.
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>How far can cats jump?</AccordionTrigger>
-                <AccordionContent>
-                  Cats can jump up to six times their length in a single bound, which is nearly 8 feet high!
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>Do cats sweat?</AccordionTrigger>
-                <AccordionContent>
-                  Cats only sweat through their paws. They primarily cool themselves by panting and grooming.
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </CardContent>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <Card className="mt-12 bg-white shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center"><Info className="mr-2 text-blue-500" /> Interesting Cat Facts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Accordion type="single" collapsible className="w-full">
+                {[
+                  { question: "How long do cats sleep?", answer: "Cats sleep an average of 15 hours a day, and some can sleep up to 20 hours in a 24-hour period." },
+                  { question: "How far can cats jump?", answer: "Cats can jump up to six times their length in a single bound, which is nearly 8 feet high!" },
+                  { question: "Do cats sweat?", answer: "Cats only sweat through their paws. They primarily cool themselves by panting and grooming." },
+                  { question: "How many teeth do cats have?", answer: "Adult cats have 30 teeth, while kittens have 26 temporary teeth." },
+                  { question: "What is a group of cats called?", answer: "A group of cats is called a clowder, a glaring, or a pounce." }
+                ].map((item, index) => (
+                  <AccordionItem value={`item-${index + 1}`} key={index}>
+                    <AccordionTrigger>{item.question}</AccordionTrigger>
+                    <AccordionContent>{item.answer}</AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       <footer className="bg-gray-800 text-white py-12">
