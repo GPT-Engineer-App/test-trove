@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Progress } from "@/components/ui/progress";
 
 const fetchCatFact = async () => {
   const response = await fetch("https://catfact.ninja/fact");
@@ -24,6 +25,8 @@ const fetchCatFact = async () => {
 const Index = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrollY, setScrollY] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [progress, setProgress] = useState(13);
 
   const { data: catFact, refetch: refetchCatFact } = useQuery({
     queryKey: ["catFact"],
@@ -37,22 +40,37 @@ const Index = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => setProgress(66), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle('dark');
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-100 to-pink-100">
-      <nav className="bg-white shadow-md sticky top-0 z-50">
+    <div className={`min-h-screen ${isDarkMode ? 'dark bg-gradient-to-b from-gray-900 to-purple-900' : 'bg-gradient-to-b from-purple-100 to-pink-100'}`}>
+      <motion.nav 
+        className={`${isDarkMode ? 'bg-gray-800' : 'bg-white'} shadow-md sticky top-0 z-50`}
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <div className="flex-shrink-0 flex items-center">
-                <Paw className="h-8 w-8 text-purple-600" />
-                <span className="ml-2 text-xl font-bold text-gray-800">CatWorld</span>
+                <Paw className={`h-8 w-8 ${isDarkMode ? 'text-purple-400' : 'text-purple-600'}`} />
+                <span className={`ml-2 text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>CatWorld</span>
               </div>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:items-center">
-              <Button variant="ghost">Home</Button>
+              <Button variant="ghost" className={isDarkMode ? 'text-white' : ''}>Home</Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center">
+                  <Button variant="ghost" className={`flex items-center ${isDarkMode ? 'text-white' : ''}`}>
                     Breeds <ChevronDown className="ml-1 h-4 w-4" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -64,27 +82,41 @@ const Index = () => {
                   <DropdownMenuItem>British Shorthair</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button variant="ghost">Care</Button>
-              <Button variant="ghost">About</Button>
+              <Button variant="ghost" className={isDarkMode ? 'text-white' : ''}>Care</Button>
+              <Button variant="ghost" className={isDarkMode ? 'text-white' : ''}>About</Button>
+              <Button variant="ghost" onClick={toggleDarkMode} className={isDarkMode ? 'text-white' : ''}>
+                <Moon className="h-5 w-5" />
+              </Button>
             </div>
             <div className="flex items-center sm:hidden">
-              <Button variant="ghost" onClick={() => setMenuOpen(!menuOpen)}>
+              <Button variant="ghost" onClick={() => setMenuOpen(!menuOpen)} className={isDarkMode ? 'text-white' : ''}>
                 <Menu className="h-6 w-6" />
               </Button>
             </div>
           </div>
         </div>
-        {menuOpen && (
-          <div className="sm:hidden">
-            <div className="pt-2 pb-3 space-y-1">
-              <Button variant="ghost" className="w-full justify-start">Home</Button>
-              <Button variant="ghost" className="w-full justify-start">Breeds</Button>
-              <Button variant="ghost" className="w-full justify-start">Care</Button>
-              <Button variant="ghost" className="w-full justify-start">About</Button>
-            </div>
-          </div>
-        )}
-      </nav>
+        <AnimatePresence>
+          {menuOpen && (
+            <motion.div 
+              className="sm:hidden"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className={`pt-2 pb-3 space-y-1 ${isDarkMode ? 'bg-gray-800' : 'bg-white'}`}>
+                <Button variant="ghost" className={`w-full justify-start ${isDarkMode ? 'text-white' : ''}`}>Home</Button>
+                <Button variant="ghost" className={`w-full justify-start ${isDarkMode ? 'text-white' : ''}`}>Breeds</Button>
+                <Button variant="ghost" className={`w-full justify-start ${isDarkMode ? 'text-white' : ''}`}>Care</Button>
+                <Button variant="ghost" className={`w-full justify-start ${isDarkMode ? 'text-white' : ''}`}>About</Button>
+                <Button variant="ghost" onClick={toggleDarkMode} className={`w-full justify-start ${isDarkMode ? 'text-white' : ''}`}>
+                  <Moon className="h-5 w-5 mr-2" /> Toggle Dark Mode
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
       <div className="relative bg-cover bg-center h-screen flex items-center justify-center overflow-hidden" style={{backgroundImage: "url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}>
         <div className="absolute inset-0 bg-black opacity-50" style={{ transform: `translateY(${scrollY * 0.5}px)` }}></div>
@@ -122,6 +154,21 @@ const Index = () => {
             </Button>
           </motion.div>
         </div>
+        <motion.div 
+          className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+        >
+          <p className="text-white mb-2">Scroll to learn more</p>
+          <div className="w-6 h-10 border-2 border-white rounded-full mx-auto">
+            <motion.div 
+              className="w-1 h-2 bg-white rounded-full mx-auto mt-2"
+              animate={{ y: [0, 15, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            />
+          </div>
+        </motion.div>
       </div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -129,7 +176,7 @@ const Index = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="bg-white rounded-lg shadow-lg p-6 mb-12"
+          className={`${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-lg p-6 mb-12`}
         >
           <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center">
             <Sparkles className="mr-2 text-yellow-400" />
@@ -149,10 +196,21 @@ const Index = () => {
             </motion.p>
           </AnimatePresence>
           <div className="mt-4 text-center">
-            <Button onClick={() => refetchCatFact()} className="mt-2">
+            <Button onClick={() => refetchCatFact()} className={`mt-2 ${isDarkMode ? 'bg-purple-600 hover:bg-purple-700' : ''}`}>
               New Fact <Star className="ml-2 h-4 w-4" />
             </Button>
           </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className={`${isDarkMode ? 'bg-gray-800 text-white' : 'bg-white'} rounded-lg shadow-lg p-6 mb-12`}
+        >
+          <h2 className="text-2xl font-bold mb-4 text-center">Cat Adoption Progress</h2>
+          <Progress value={progress} className="w-full" />
+          <p className="text-center mt-2">Help us reach our goal of 100 cat adoptions this month!</p>
         </motion.div>
         
         <Tabs defaultValue="characteristics" className="mb-12">
