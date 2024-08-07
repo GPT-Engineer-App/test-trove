@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Menu, Paw, Heart, Info, ChevronDown, Star, Sparkles } from "lucide-react";
+import { Menu, Paw, Heart, Info, ChevronDown, Star, Sparkles, Cat, Fish, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   DropdownMenu,
@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const fetchCatFact = async () => {
   const response = await fetch("https://catfact.ninja/fact");
@@ -88,10 +89,17 @@ const Index = () => {
       <div className="relative bg-cover bg-center h-screen flex items-center justify-center overflow-hidden" style={{backgroundImage: "url('https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"}}>
         <div className="absolute inset-0 bg-black opacity-50" style={{ transform: `translateY(${scrollY * 0.5}px)` }}></div>
         <div className="relative z-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+          >
+            <Cat className="text-white w-24 h-24 mx-auto mb-6" />
+          </motion.div>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
             className="text-6xl font-bold text-white mb-4"
           >
             All About Cats
@@ -99,11 +107,20 @@ const Index = () => {
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
             className="text-xl text-white"
           >
             Discover the fascinating world of our feline friends
           </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            <Button className="mt-8 bg-white text-purple-600 hover:bg-purple-100">
+              Explore Now <Fish className="ml-2 h-4 w-4" />
+            </Button>
+          </motion.div>
         </div>
       </div>
       
@@ -228,13 +245,23 @@ const Index = () => {
                 <CardDescription>Some well-known cat breeds around the world</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex overflow-x-auto space-x-4 pb-4">
-                  {["Siamese", "Persian", "Maine Coon", "Bengal", "British Shorthair"].map((breed, index) => (
-                    <div key={index} className="flex-shrink-0 w-48 h-64 bg-gray-200 rounded-lg flex items-center justify-center">
-                      <p className="text-lg font-semibold">{breed}</p>
-                    </div>
-                  ))}
-                </div>
+                <Carousel className="w-full max-w-xs mx-auto">
+                  <CarouselContent>
+                    {["Siamese", "Persian", "Maine Coon", "Bengal", "British Shorthair"].map((breed, index) => (
+                      <CarouselItem key={index}>
+                        <div className="p-1">
+                          <Card>
+                            <CardContent className="flex aspect-square items-center justify-center p-6">
+                              <span className="text-3xl font-semibold">{breed}</span>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      </CarouselItem>
+                    ))}
+                  </CarouselContent>
+                  <CarouselPrevious />
+                  <CarouselNext />
+                </Carousel>
               </CardContent>
             </Card>
           </motion.div>
@@ -269,31 +296,34 @@ const Index = () => {
         </motion.div>
       </div>
 
-      <footer className="bg-gray-800 text-white py-12">
+      <footer className="bg-gradient-to-r from-purple-600 to-pink-500 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
-              <h2 className="text-2xl font-bold">CatWorld</h2>
+              <h2 className="text-2xl font-bold flex items-center">
+                <Paw className="mr-2" /> CatWorld
+              </h2>
               <p className="mt-2">Celebrating our feline friends</p>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2">Quick Links</h3>
               <ul className="space-y-2">
-                <li><a href="#" className="hover:text-gray-300">Home</a></li>
-                <li><a href="#" className="hover:text-gray-300">Breeds</a></li>
-                <li><a href="#" className="hover:text-gray-300">Care</a></li>
-                <li><a href="#" className="hover:text-gray-300">About</a></li>
+                {["Home", "Breeds", "Care", "About"].map((link, index) => (
+                  <motion.li key={index} whileHover={{ x: 5 }} transition={{ type: "spring", stiffness: 400, damping: 10 }}>
+                    <a href="#" className="hover:text-gray-300">{link}</a>
+                  </motion.li>
+                ))}
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-2">Subscribe to Our Newsletter</h3>
               <form className="flex">
-                <Input type="email" placeholder="Enter your email" className="rounded-r-none" />
-                <Button type="submit" className="rounded-l-none">Subscribe</Button>
+                <Input type="email" placeholder="Enter your email" className="rounded-r-none bg-white/20 border-white/40 text-white placeholder-white/70" />
+                <Button type="submit" className="rounded-l-none bg-white text-purple-600 hover:bg-purple-100">Subscribe</Button>
               </form>
             </div>
           </div>
-          <div className="mt-8 border-t border-gray-700 pt-8 text-center">
+          <div className="mt-8 border-t border-white/20 pt-8 text-center">
             <p>&copy; 2023 CatWorld. All rights reserved.</p>
           </div>
         </div>
